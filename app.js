@@ -4,6 +4,8 @@ const graphqlHttp = require("express-graphql");
 const { buildSchema } = require("graphql");
 const mongoose = require("mongoose");
 
+const Event = require("./models/event");
+
 const app = express();
 app.use(bodyParser.json());
 
@@ -43,19 +45,34 @@ app.use(
   `),
     rootValue: {
       events: () => {
-        return EVENTS;
+        return Event.find()
+          .then(resp => {
+            return resp.map(event => {
+              return { ...event._doc, _id: event.id };
+            });
+          })
+          .catch(err => {
+            console.log(err);
+            throw err;
+          });
       },
       createEvent: args => {
-        const event = {
-          _id: Math.floor(Math.random() * 100).toString(),
+        const event = new Event({
           title: args.eventInput.title,
           description: args.eventInput.description,
           price: +args.eventInput.price,
           date: new Date().toISOString()
-        };
+        });
 
-        EVENTS.push(event);
-        return event;
+        return event
+          .save()
+          .then(res => {
+            return { ...res._doc, _id: event.id };
+          })
+          .catch(err => {
+            console.log(err);
+            throw err;
+          });
       }
     },
     graphiql: true
@@ -64,7 +81,7 @@ app.use(
 
 mongoose
   .connect(
-    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-bsjtx.mongodb.net/test?retryWrites=true&w=majority`
+    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-bsjtx.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
   )
   .then(res => {
     app.listen(3000, (req, res) => console.log("Running on port 3000"));

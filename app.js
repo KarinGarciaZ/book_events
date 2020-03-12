@@ -20,7 +20,11 @@ app.use(
 
 mongoose
   .connect(
-    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-bsjtx.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
+    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-bsjtx.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`,
+    { 
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    }
   )
   .then(res => {
     app.listen(3000, (req, res) => console.log("Running on port 3000"));

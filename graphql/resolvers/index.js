@@ -31,25 +31,33 @@ const events = async eventIds => {
 
 const resolvers = {
   events: async () => {
-    const resp = await Event.find({}).populate("creator");
-    return resp.map(event => {
-      return {
-        ...event._doc,
-        _id: event.id,
-        creator: user.bind(this, event._doc.creator.id)
-      };
-    });
+    try {
+      const resp = await Event.find({}).populate("creator");
+      return resp.map(event => {
+        return {
+          ...event._doc,
+          _id: event.id,
+          creator: user.bind(this, event._doc.creator.id)
+        };
+      });
+    } catch (err) {
+      throw err;
+    }
   },
   createEvent: async args => {
-    const event = new Event({
-      title: args.eventInput.title,
-      description: args.eventInput.description,
-      price: +args.eventInput.price,
-      date: new Date().toISOString()
-    });
-
-    const res = event.save();
-    return { ...res._doc, _id: event.id };
+    try {
+      const event = new Event({
+        title: args.eventInput.title,
+        description: args.eventInput.description,
+        price: +args.eventInput.price,
+        date: new Date().toISOString()
+      });
+  
+      const res = event.save();
+      return { ...res._doc, _id: event.id };
+    } catch (err) {
+      throw err;
+    }
   },
   createUser: args => {}
 };
